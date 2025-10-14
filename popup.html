@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Follower Bot</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Instagram Follower Bot</h1>
+        
+        <div class="status-banner" id="statusBanner"></div>
+        
+        <div class="form-section">
+            <label for="instagramUsername">
+                <strong>Instagram Username</strong>
+            </label>
+            <input 
+                type="text" 
+                id="instagramUsername" 
+                placeholder="Enter your Instagram username"
+                autocomplete="off"
+            >
+        </div>
+        
+        <div class="form-section">
+            <label>
+                <strong>Select Schools</strong>
+                <span class="subtitle">(Select one or more)</span>
+            </label>
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="schoolSearch" 
+                    placeholder="Search schools..."
+                    autocomplete="off"
+                >
+            </div>
+            <div class="school-list" id="schoolList">
+                <!-- Schools will be dynamically loaded here -->
+            </div>
+            <div class="selected-count" id="selectedCount">0 schools selected</div>
+        </div>
+        
+        <div class="form-section">
+            <label>
+                <strong>Bot Mode</strong>
+            </label>
+            <div class="mode-selector">
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="mode1" checked>
+                    <span>Mode 1: Following → Followers</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="explore">
+                    <span>Explore Mode: Browse People</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="test">
+                    <span>🧪 Test Mode: Single Profile</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="quicktest">
+                    <span>⚡ Quick Test: First Follower Only</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-section" id="testModeSection" style="display: none;">
+            <label for="testUsername">
+                <strong>Test Profile Username</strong>
+                <span class="subtitle">(Test on this specific profile)</span>
+            </label>
+            <input 
+                type="text" 
+                id="testUsername" 
+                placeholder="e.g., vanyacampsvb.2027"
+                autocomplete="off"
+            >
+        </div>
+        
+        <div class="form-section" id="quickTestModeSection" style="display: none;">
+            <label for="quickTestUsernames">
+                <strong>Usernames to Test (one per line)</strong>
+                <span class="subtitle">(Will check FIRST follower of each)</span>
+            </label>
+            <textarea 
+                id="quickTestUsernames" 
+                rows="5"
+                placeholder="diem5509&#10;vivienne_l814&#10;amazing.aidaa"
+                style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: monospace; font-size: 13px;"
+            ></textarea>
+        </div>
+        
+        <div class="stats-section" id="statsSection" style="display: none;">
+            <h3>Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Profiles Visited</div>
+                    <div class="stat-value" id="profilesVisited">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Followed</div>
+                    <div class="stat-value" id="followedCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value" id="botStatus">Idle</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button id="startBtn" class="btn btn-primary">
+                Start Bot
+            </button>
+            <button id="stopBtn" class="btn btn-danger" style="display: none;">
+                Stop Bot
+            </button>
+        </div>
+        
+        <div id="shareBtnSection" style="margin-bottom: 15px; margin-top: 15px;">
+            <div id="shareInfoBox" style="background: #d1ecf1; border: 2px solid #17a2b8; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <strong style="color: #0c5460; font-size: 14px;">🎥 Screen Sharing (Highly Recommended!)</strong>
+                <p style="color: #0c5460; margin: 6px 0 0 0; font-size: 12px; line-height: 1.4;">
+                    <strong>How it works:</strong> Opens a dedicated tab with instructions. Click the button there to start sharing. Select <strong>"Window"</strong> and choose the bot's Instagram window. <strong>Keep that tab open!</strong>
+                </p>
+            </div>
+            <button id="enableSharingBtn" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); font-size: 14px; padding: 12px;">
+                🎥 Enable Screen Sharing
+            </button>
+            <div id="sharingStatus" style="display: none; margin-top: 10px; padding: 10px; background: #d4edda; border-radius: 6px; border: 1px solid #c3e6cb;">
+                <span style="color: #155724; font-size: 12px;">✅ Screen sharing active! Bot will scroll perfectly in background.</span>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-item">
+                <strong>⏱️ Rate Limits:</strong>
+                <ul>
+                    <li>30s delay between profiles</li>
+                    <li>1 hour break after 5 follows</li>
+                </ul>
+            </div>
+            <div class="warning" style="background: #d1ecf1; border-color: #bee5eb; color: #0c5460;">
+                🪟 Bot opens in a SEPARATE window - your main window stays free for work!
+            </div>
+            <div class="info-item" style="margin-top: 8px; font-size: 12px; color: #0c5460; background: #fff3cd; padding: 10px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                <strong>💡 Best Performance:</strong> Keep bot window visible (move to second monitor or resize small). Minimizing may slow down scrolling due to Chrome's throttling.
+            </div>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
+
