@@ -24,8 +24,8 @@ A Chrome Extension that automates Instagram following based on school affiliatio
 
 ### Safety Features
 
-- **Rate Limiting**: 30-second delay between profile visits
-- **Break System**: 1-hour break after every 5 follows
+- **Rate Limiting**: 15-second delay between profile visits
+- **Break System**: 60-minute break after every 5 follows
 - **Daily Limit Detection**: Automatically detects and handles Instagram's follow limits
 - **Human-like Behavior**: Mimics natural browsing patterns to avoid detection
 
@@ -90,8 +90,8 @@ A Chrome Extension that automates Instagram following based on school affiliatio
 
 ### Built-in Protections
 
-- ⏱️ **30-second delays**: Between each profile visit
-- ⏸️ **1-hour breaks**: After every 5 follows
+- ⏱️ **15-second delays**: Between each profile visit
+- ⏸️ **60-minute breaks**: After every 5 follows
 - 🚫 **Daily limit detection**: Stops when Instagram limit is reached
 - 👤 **Skip already followed**: Won't re-follow existing connections
 
@@ -140,7 +140,7 @@ Manages bot execution and flow:
 - Rate limiting enforcement
 - Statistics tracking
 - Error handling
-- Break management (1-hour cooldown)
+- Break management (60-minute cooldown)
 
 ### Popup Interface (`popup.html/js/css`)
 
@@ -193,7 +193,7 @@ Each school includes multiple abbreviations for accurate matching:
 
 - **Popup closed**: Statistics update even when popup is closed
 - **Reopen popup**: Click extension icon to see latest stats
-- **Check background**: Bot may be in 1-hour break period
+- **Check background**: Bot may be in 60-minute break period
 
 ## Best Practices
 
@@ -284,5 +284,10 @@ Built with:
 **Version**: 1.0  
 **Last Updated**: 2025  
 **License**: Educational Use Only
+
+
+
+
+
 
 

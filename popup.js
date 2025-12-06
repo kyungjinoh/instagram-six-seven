@@ -2,6 +2,9 @@
 let schoolsData = [];
 let selectedSchools = new Set();
 
+// Native host connection status
+let nativeHostConnected = false;
+
 // Load schools from JSON
 fetch(chrome.runtime.getURL('schools.json'))
     .then(response => response.json())
@@ -14,6 +17,143 @@ fetch(chrome.runtime.getURL('schools.json'))
         console.error('Error loading schools:', error);
         showStatus('Failed to load schools data', 'error');
     });
+
+// Check native host connection status
+function checkNativeHostConnection() {
+    console.log('🔍 Checking native host connection...');
+    chrome.runtime.sendMessage({ action: 'checkNativeHost' }, (response) => {
+        console.log('📡 Native host response:', response);
+        if (chrome.runtime.lastError) {
+            console.error('❌ Extension error:', chrome.runtime.lastError);
+            updateNativeHostStatus(false, 'Extension error: ' + chrome.runtime.lastError.message);
+            return;
+        }
+        
+        if (response && response.success) {
+            console.log('✅ Native host status:', response.connected, response.message);
+            updateNativeHostStatus(response.connected, response.message || 'Connection status updated');
+        } else {
+            console.log('❌ No response or failed response');
+            updateNativeHostStatus(false, 'Failed to check connection');
+        }
+    });
+}
+
+// Update native host status display
+function updateNativeHostStatus(connected, message) {
+    nativeHostConnected = connected;
+    const statusElement = document.getElementById('connectionStatus');
+    const statusBox = document.getElementById('nativeHostStatus');
+    
+    if (connected) {
+        statusElement.textContent = `✅ Connected - ${message}`;
+        statusBox.style.background = '#d4edda';
+        statusBox.style.borderColor = '#c3e6cb';
+        statusBox.querySelector('strong').style.color = '#155724';
+        statusBox.querySelector('p').style.color = '#155724';
+        
+        // Update screen sharing section to show it's optional
+        const shareInfoBox = document.getElementById('shareInfoBox');
+        shareInfoBox.innerHTML = `
+            <strong style="color: #0c5460; font-size: 14px;">🎥 Screen Sharing (Optional with Native Host)</strong>
+            <p style="color: #0c5460; margin: 6px 0 0 0; font-size: 12px; line-height: 1.4;">
+                <strong>✅ Native Host Active:</strong> Screen sharing is optional! The native host provides permanent background operation. You can still use screen sharing for extra performance.
+            </p>
+        `;
+    } else {
+        statusElement.textContent = `❌ Disconnected - ${message}`;
+        statusBox.style.background = '#f8d7da';
+        statusBox.style.borderColor = '#dc3545';
+        statusBox.querySelector('strong').style.color = '#721c24';
+        statusBox.querySelector('p').style.color = '#721c24';
+        
+        // Update screen sharing section to show it's recommended
+        const shareInfoBox = document.getElementById('shareInfoBox');
+        shareInfoBox.innerHTML = `
+            <strong style="color: #0c5460; font-size: 14px;">🎥 Screen Sharing (Highly Recommended!)</strong>
+            <p style="color: #0c5460; margin: 6px 0 0 0; font-size: 12px; line-height: 1.4;">
+                <strong>⚠️ Native Host Offline:</strong> Screen sharing is highly recommended for background operation. Opens a dedicated tab with instructions. <strong>Keep that tab open!</strong>
+            </p>
+        `;
+    }
+}
+
+// Check connection on popup load
+checkNativeHostConnection();
+
+// Check connection every 5 seconds
+setInterval(checkNativeHostConnection, 5000);
+
+// Force connect button
+document.getElementById('forceConnectBtn').addEventListener('click', () => {
+    console.log('🔄 Force connect button clicked');
+    chrome.runtime.sendMessage({ action: 'forceConnectNativeHost' }, (response) => {
+        if (chrome.runtime.lastError) {
+            console.error('❌ Force connect error:', chrome.runtime.lastError);
+        } else {
+            console.log('✅ Force connect response:', response);
+            // Check connection again after a short delay
+            setTimeout(checkNativeHostConnection, 1000);
+        }
+    });
+});
+
+// Sleep mode check button
+document.getElementById('checkSleepModeBtn').addEventListener('click', () => {
+    console.log('🌙 Sleep mode check button clicked');
+    chrome.runtime.sendMessage({ action: 'checkSleepModeDialog' }, (response) => {
+        if (chrome.runtime.lastError) {
+            console.error('❌ Sleep mode check error:', chrome.runtime.lastError);
+            showStatus('Error checking for sleep mode dialog', 'error');
+        } else {
+            console.log('✅ Sleep mode check response:', response);
+            if (response && response.success) {
+                if (response.closed) {
+                    showStatus('✅ Sleep mode dialog found and closed!', 'success');
+                } else {
+                    showStatus('ℹ️ No sleep mode dialog found', 'info');
+                }
+            } else {
+                showStatus('Error checking for sleep mode dialog', 'error');
+            }
+        }
+    });
+});
+
+// Open Native Host button
+document.getElementById('openNativeHostBtn').addEventListener('click', async () => {
+    console.log('🚀 Open Native Host button clicked');
+    showStatus('Opening Native Host Manager...', 'info');
+    
+    try {
+        // Open the native host webapp in a new tab
+        const nativeHostTab = await chrome.tabs.create({
+            url: 'http://localhost:5000',
+            active: true
+        });
+        
+        console.log('✅ Native Host Manager tab opened:', nativeHostTab.id);
+        showStatus('Native Host Manager opened!', 'success');
+        
+        // Check if the webapp is running after a short delay
+        setTimeout(async () => {
+            try {
+                // Try to check if the webapp is accessible
+                const response = await fetch('http://localhost:5000/api/status');
+                if (!response.ok) {
+                    showStatus('⚠️ Native Host webapp may not be running. Run: python3 start_webapp.py', 'error');
+                }
+            } catch (error) {
+                console.log('⚠️ Native Host webapp not accessible:', error);
+                showStatus('⚠️ Native Host webapp not running. Run: python3 start_webapp.py', 'error');
+            }
+        }, 2000);
+        
+    } catch (error) {
+        console.error('❌ Error opening Native Host Manager:', error);
+        showStatus('Could not open Native Host Manager. Make sure the webapp is running (python3 start_webapp.py)', 'error');
+    }
+});
 
 // Render schools list
 function renderSchools(schools) {
@@ -73,16 +213,46 @@ document.querySelectorAll('input[name="mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         const testModeSection = document.getElementById('testModeSection');
         const quickTestModeSection = document.getElementById('quickTestModeSection');
+        const followTestModeSection = document.getElementById('followTestModeSection');
+        const pvphsModeSection = document.getElementById('pvphsModeSection');
+        const reelsLikeModeSection = document.getElementById('reelsLikeModeSection');
         
         if (e.target.value === 'test') {
             testModeSection.style.display = 'block';
             quickTestModeSection.style.display = 'none';
+            followTestModeSection.style.display = 'none';
+            pvphsModeSection.style.display = 'none';
+            reelsLikeModeSection.style.display = 'none';
         } else if (e.target.value === 'quicktest') {
             testModeSection.style.display = 'none';
             quickTestModeSection.style.display = 'block';
+            followTestModeSection.style.display = 'none';
+            pvphsModeSection.style.display = 'none';
+            reelsLikeModeSection.style.display = 'none';
+        } else if (e.target.value === 'followtest') {
+            testModeSection.style.display = 'none';
+            quickTestModeSection.style.display = 'none';
+            followTestModeSection.style.display = 'block';
+            pvphsModeSection.style.display = 'none';
+            reelsLikeModeSection.style.display = 'none';
+        } else if (e.target.value === 'pvphs') {
+            testModeSection.style.display = 'none';
+            quickTestModeSection.style.display = 'none';
+            followTestModeSection.style.display = 'none';
+            pvphsModeSection.style.display = 'block';
+            reelsLikeModeSection.style.display = 'none';
+        } else if (e.target.value === 'reelslike') {
+            testModeSection.style.display = 'none';
+            quickTestModeSection.style.display = 'none';
+            followTestModeSection.style.display = 'none';
+            pvphsModeSection.style.display = 'none';
+            reelsLikeModeSection.style.display = 'block';
         } else {
             testModeSection.style.display = 'none';
             quickTestModeSection.style.display = 'none';
+            followTestModeSection.style.display = 'none';
+            pvphsModeSection.style.display = 'none';
+            reelsLikeModeSection.style.display = 'none';
         }
     });
 });
@@ -90,7 +260,14 @@ document.querySelectorAll('input[name="mode"]').forEach(radio => {
 // Show status message
 function showStatus(message, type = 'info') {
     const banner = document.getElementById('statusBanner');
-    banner.textContent = message;
+    
+    // Add native host status to message if connected
+    let enhancedMessage = message;
+    if (nativeHostConnected && type === 'info') {
+        enhancedMessage = `🚀 ${message} (Native Host Active)`;
+    }
+    
+    banner.textContent = enhancedMessage;
     banner.className = `status-banner ${type}`;
     
     if (type !== 'error') {
@@ -157,12 +334,12 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     const mode = document.querySelector('input[name="mode"]:checked').value;
     
     // Validation
-    if (!username && mode !== 'test') {
+    if (!username && mode !== 'test' && mode !== 'followtest' && mode !== 'storylike' && mode !== 'pvphs' && mode !== 'reelslike') {
         showStatus('Please enter your Instagram username', 'error');
         return;
     }
     
-    if (selectedSchools.size === 0) {
+    if (selectedSchools.size === 0 && mode !== 'followtest' && mode !== 'storylike' && mode !== 'pvphs' && mode !== 'reelslike') {
         showStatus('Please select at least one school', 'error');
         return;
     }
@@ -170,11 +347,32 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     // Test mode specific validation
     let testUsername = '';
     let quickTestUsernames = [];
+    let followTestUsername = '';
+    let pvphsAccount = '';
+    let reelsAccount = '';
     
     if (mode === 'test') {
         testUsername = document.getElementById('testUsername').value.trim();
         if (!testUsername) {
             showStatus('Please enter a test profile username', 'error');
+            return;
+        }
+    } else if (mode === 'followtest') {
+        followTestUsername = document.getElementById('followTestUsername').value.trim();
+        if (!followTestUsername) {
+            showStatus('Please enter a username to test Following detection', 'error');
+            return;
+        }
+    } else if (mode === 'pvphs') {
+        pvphsAccount = document.getElementById('pvphsAccount').value.trim();
+        if (!pvphsAccount) {
+            showStatus('Please select a PVHS account', 'error');
+            return;
+        }
+    } else if (mode === 'reelslike') {
+        reelsAccount = document.getElementById('reelsAccount').value.trim();
+        if (!reelsAccount) {
+            showStatus('Please select an account', 'error');
             return;
         }
     } else if (mode === 'quicktest') {
@@ -230,9 +428,12 @@ document.getElementById('startBtn').addEventListener('click', async () => {
         config: {
             username: username,
             mode: mode,
+            followTestUsername: followTestUsername,
             schools: selectedSchoolsData,
             testUsername: testUsername || null,
-            quickTestUsernames: quickTestUsernames.length > 0 ? quickTestUsernames : null
+            quickTestUsernames: quickTestUsernames.length > 0 ? quickTestUsernames : null,
+            pvphsAccount: pvphsAccount || null,
+            reelsAccount: reelsAccount || null
         }
     }, (response) => {
         if (response && response.success) {
@@ -338,6 +539,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         
         showStatus(`✅ Screen sharing active! (${request.surface} at ${request.resolution})`, 'success');
         
+        // Notify native host about screen sharing
+        chrome.runtime.sendMessage({
+            action: 'notifyNativeHost',
+            type: 'screen_sharing_started'
+        }).catch(() => {});
+        
         // Show success status
         document.getElementById('sharingStatus').style.display = 'block';
         document.getElementById('sharingStatus').innerHTML = `
@@ -363,6 +570,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log('⚠️ Screen sharing stopped');
         
         showStatus('⚠️ Screen sharing stopped. Click button to restart.', 'error');
+        
+        // Notify native host about screen sharing stop
+        chrome.runtime.sendMessage({
+            action: 'notifyNativeHost',
+            type: 'screen_sharing_stopped'
+        }).catch(() => {});
         
         // Reset button
         document.getElementById('enableSharingBtn').textContent = '🎥 Enable Screen Sharing';

@@ -64,7 +64,7 @@
 | "Getting followers of @username" | Extracting someone's followers |
 | "Visiting @username" | Checking a profile |
 | "Followed @username" | Successfully followed someone |
-| "Taking 1 hour break..." | Cooldown period started |
+| "Taking 60 minute break..." | Cooldown period started |
 | "Stopped" | Bot has been manually stopped |
 
 ### Statistics Panel
@@ -129,15 +129,15 @@ This prevents patterns and mimics natural behavior.
 
 The bot includes several safety features:
 
-1. **30-Second Profile Delay**
+1. **15-Second Profile Delay**
    - After visiting each profile
    - Gives Instagram time to process
    - Prevents rapid-fire requests
 
-2. **1-Hour Break After 5 Follows**
+2. **60-Minute Break After 5 Follows**
    - Automatically triggers
    - Bot will wait for 60 minutes
-   - Status will show "Taking 1 hour break..."
+   - Status will show "Taking 60 minute break..."
    - This is NORMAL and EXPECTED
 
 3. **Daily Limit Detection**
@@ -151,9 +151,9 @@ The bot includes several safety features:
 #### First Hour
 - Expect 10-20 profiles visited
 - Maybe 2-5 follows (depending on match rate)
-- One 1-hour break after 5 follows
+- One 60-minute break after 5 follows
 
-#### After 1-Hour Break
+#### After 30-Minute Break
 - Bot resumes automatically
 - Continues from where it left off
 - Will follow 5 more, then break again
@@ -191,7 +191,7 @@ The bot includes several safety features:
 
 ### Bot Gets Stuck on One Profile
 
-**This is normal!** The bot waits 30 seconds between profiles.
+**This is normal!** The bot waits 15 seconds between profiles.
 
 If truly stuck for 5+ minutes:
 1. Click "Stop Bot"
@@ -231,7 +231,7 @@ If concerned:
 **Do:**
 - ✅ Run for 2-3 hour sessions
 - ✅ Take breaks between sessions
-- ✅ Let the 1-hour cooldowns happen
+- ✅ Let the 60-minute cooldowns happen
 - ✅ Respect daily limits
 
 ### School Selection
@@ -369,7 +369,7 @@ All data is stored in Chrome's local storage:
 ## Common Questions
 
 **Q: Why is the bot so slow?**  
-A: The 30-second delays and 1-hour breaks are intentional safety features to prevent Instagram from flagging your account.
+A: The 15-second delays and 30-minute breaks are intentional safety features to prevent Instagram from flagging your account.
 
 **Q: Can I speed it up?**  
 A: No. The delays are hardcoded for your protection. Removing them risks account suspension.
@@ -401,5 +401,10 @@ If something isn't working:
 4. Try reinstalling the extension
 
 Remember: Be patient, respect the rate limits, and use responsibly! 🎓
+
+
+
+
+
 
 

@@ -64,7 +64,72 @@
                     <input type="radio" name="mode" value="quicktest">
                     <span>⚡ Quick Test: First Follower Only</span>
                 </label>
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="followtest">
+                    <span>🔍 Following Detection Test</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="storylike">
+                    <span>❤️ Story Like Mode</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="pvphs">
+                    <span>🏫 PVHS Followers Mode</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="mode" value="reelslike">
+                    <span>🎬 Reels Like Comments Mode</span>
+                </label>
             </div>
+        </div>
+        
+        <div class="form-section" id="reelsLikeModeSection" style="display: none;">
+            <label for="reelsAccount">
+                <strong>Select Account</strong>
+                <span class="subtitle">(Will like all comments on all reels)</span>
+            </label>
+            <select 
+                id="reelsAccount" 
+                style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;"
+            >
+                <option value="ben.andrews28">@ben.andrews28</option>
+            </select>
+            <p style="font-size: 12px; color: #666; margin-top: 8px;">
+                ℹ️ This mode will navigate to the account's Reels tab, open each reel, and like all comments.
+            </p>
+        </div>
+        
+        <div class="form-section" id="pvphsModeSection" style="display: none;">
+            <label for="pvphsAccount">
+                <strong>Select Account</strong>
+                <span class="subtitle">(Will follow all followers of selected account)</span>
+            </label>
+            <select 
+                id="pvphsAccount" 
+                style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;"
+            >
+                <optgroup label="PVHS">
+                    <option value="pvphs29">@pvphs29</option>
+                    <option value="pvphs28">@pvphs28</option>
+                    <option value="pvphs.2027">@pvphs.2027</option>
+                    <option value="pvphs_2026">@pvphs_2026</option>
+                </optgroup>
+                <optgroup label="Dublin High">
+                    <option value="dublinhigh26">@dublinhigh26</option>
+                    <option value="dublinhigh28">@dublinhigh28</option>
+                    <option value="dublinhigh27">@dublinhigh27</option>
+                    <option value="dublinhigh29">@dublinhigh29</option>
+                </optgroup>
+                <optgroup label="Granada">
+                    <option value="granada_2029">@granada_2029</option>
+                    <option value="granada_2028">@granada_2028</option>
+                    <option value="granada_2026">@granada_2026</option>
+                    <option value="granada__2027">@granada__2027</option>
+                </optgroup>
+            </select>
+            <p style="font-size: 12px; color: #666; margin-top: 8px;">
+                ℹ️ This mode will follow ALL followers of the selected account (no keyword filter).
+            </p>
         </div>
         
         <div class="form-section" id="testModeSection" style="display: none;">
@@ -91,6 +156,23 @@
                 placeholder="diem5509&#10;vivienne_l814&#10;amazing.aidaa"
                 style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: monospace; font-size: 13px;"
             ></textarea>
+        </div>
+        
+        <div class="form-section" id="followTestModeSection" style="display: none;">
+            <label for="followTestUsername">
+                <strong>Test Username</strong>
+                <span class="subtitle">(Will analyze their followers list for "Following" detection)</span>
+            </label>
+            <input 
+                type="text" 
+                id="followTestUsername" 
+                placeholder="e.g., brandon_p0423"
+                autocomplete="off"
+                value="brandon_p0423"
+            >
+            <p style="font-size: 12px; color: #666; margin-top: 8px;">
+                ℹ️ This mode will open the followers modal and show detailed debug info about button detection (Following vs Follow).
+            </p>
         </div>
         
         <div class="stats-section" id="statsSection" style="display: none;">
@@ -120,11 +202,24 @@
             </button>
         </div>
         
+        <!-- Native Host Connection Status -->
+        <div id="nativeHostSection" style="margin-bottom: 15px; margin-top: 15px;">
+            <div id="nativeHostStatus" style="background: #f8d7da; border: 2px solid #dc3545; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <strong style="color: #721c24; font-size: 14px;">🔌 Native Host Status</strong>
+                <p style="color: #721c24; margin: 6px 0 0 0; font-size: 12px; line-height: 1.4;">
+                    <span id="connectionStatus">Checking connection...</span>
+                </p>
+                <button id="forceConnectBtn" style="margin-top: 8px; padding: 4px 8px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🔄 Force Connect</button>
+                <button id="checkSleepModeBtn" style="margin-top: 8px; margin-left: 8px; padding: 4px 8px; font-size: 11px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">🌙 Check Sleep Mode</button>
+                <button id="openNativeHostBtn" style="margin-top: 8px; margin-left: 8px; padding: 4px 8px; font-size: 11px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">🚀 Open Native Host</button>
+            </div>
+        </div>
+        
         <div id="shareBtnSection" style="margin-bottom: 15px; margin-top: 15px;">
             <div id="shareInfoBox" style="background: #d1ecf1; border: 2px solid #17a2b8; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-                <strong style="color: #0c5460; font-size: 14px;">🎥 Screen Sharing (Highly Recommended!)</strong>
+                <strong style="color: #0c5460; font-size: 14px;">🎥 Screen Sharing (Optional with Native Host)</strong>
                 <p style="color: #0c5460; margin: 6px 0 0 0; font-size: 12px; line-height: 1.4;">
-                    <strong>How it works:</strong> Opens a dedicated tab with instructions. Click the button there to start sharing. Select <strong>"Window"</strong> and choose the bot's Instagram window. <strong>Keep that tab open!</strong>
+                    <strong>Native Host Active:</strong> Screen sharing is optional! The native host provides permanent background operation. You can still use screen sharing for extra performance.
                 </p>
             </div>
             <button id="enableSharingBtn" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); font-size: 14px; padding: 12px;">
@@ -139,8 +234,8 @@
             <div class="info-item">
                 <strong>⏱️ Rate Limits:</strong>
                 <ul>
-                    <li>30s delay between profiles</li>
-                    <li>1 hour break after 5 follows</li>
+                    <li>15s delay between profiles</li>
+                    <li>60 minute break after 5 follows</li>
                 </ul>
             </div>
             <div class="warning" style="background: #d1ecf1; border-color: #bee5eb; color: #0c5460;">

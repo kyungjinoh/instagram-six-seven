@@ -1,0 +1,10 @@
+{
+  "name": "com.instagrambot.host",
+  "description": "Instagram Bot Native Host - Provides persistent background operation",
+  "path": "/Users/kyungjinoh/Desktop/Coding/Instagram six seven/native_host.py",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://nfilkjclmmgdcbaaapclbfinbhfaedce/"
+  ]
+}
+

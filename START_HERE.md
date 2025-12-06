@@ -51,7 +51,7 @@ If not, the script will tell you what's missing.
 ### First 30 Minutes
 - Bot visits 5-10 profiles
 - Follows 1-3 people (if they match)
-- May take a 1-hour break after 5 follows
+- May take a 60-minute break after 5 follows
 
 ### Statistics Panel Shows:
 - **Profiles Visited**: How many checked
@@ -65,7 +65,7 @@ If not, the script will tell you what's missing.
 ✅ **DO:**
 - Start with 3-5 schools
 - Run for 1-2 hours first time
-- Let the 1-hour breaks happen (it's normal!)
+- Let the 60-minute breaks happen (it's normal!)
 - Check who you followed after
 
 ❌ **DON'T:**
@@ -111,8 +111,8 @@ Choose what you need:
 - Be patient - bot checks many profiles
 
 ### Bot Seems Stuck
-- Wait 30 seconds (normal delay between profiles)
-- Check Status field - does it say "Taking 1 hour break"?
+- Wait 15 seconds (normal delay between profiles)
+- Check Status field - does it say "Taking 60 minute break"?
 - If truly stuck for 5+ minutes, click Stop Bot and restart
 
 ---
@@ -137,8 +137,8 @@ Select 2-5 schools:
 
 The bot has built-in delays for safety:
 
-- **30 seconds** between each profile visit
-- **1 hour break** after every 5 follows
+- **15 seconds** between each profile visit
+- **60 minute break** after every 5 follows
 
 This is **intentional** and **cannot be changed**.
 
@@ -156,7 +156,7 @@ Why? To protect your account from Instagram's spam detection.
 ### After 1 Hour of Running:
 - Visited: 10-30 profiles
 - Followed: 2-8 people
-- Breaks: 1-2 one-hour pauses
+- Breaks: 1-2 half-hour pauses
 
 ### After 1 Day (3-4 hours of use):
 - Visited: 50-100 profiles
@@ -241,7 +241,7 @@ This bot includes safety features, but you should also:
 
 5. **Be Patient**
    - This is a slow, steady process
-   - 1-hour breaks are GOOD (they protect you)
+   - 60-minute breaks are GOOD (they protect you)
    - Focus on building genuine connections
 
 ---

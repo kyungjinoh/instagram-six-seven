@@ -402,3 +402,8 @@ User: Tries different schools or different profile
 Perfect! Now the user understands exactly how the bot works! 🎓
 
 
+
+
+
+
+

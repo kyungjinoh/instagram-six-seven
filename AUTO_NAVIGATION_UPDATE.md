@@ -377,3 +377,8 @@ Simple, convenient, and fewer errors! ✨
 **Ready to test?** Reload the extension and try starting from a non-Instagram tab!
 
 
+
+
+
+
+

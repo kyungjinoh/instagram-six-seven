@@ -9,7 +9,8 @@
     "activeTab",
     "scripting",
     "offscreen",
-    "tabCapture"
+    "tabCapture",
+    "nativeMessaging"
   ],
   "host_permissions": [
     "https://www.instagram.com/*"
@@ -40,8 +41,7 @@
   "web_accessible_resources": [
     {
       "resources": ["schools.json"],
-      "matches": ["https://www.instagram.com/*"]
+      "matches": ["<all_urls>"]
     }
   ]
 }
-

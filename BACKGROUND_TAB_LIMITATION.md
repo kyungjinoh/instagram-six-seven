@@ -219,3 +219,8 @@ The bot will run perfectly in the minimized window. 🚀
 2. Enable debugger API (no flashing, but shows warning)
 3. Something else?
 
+
+
+
+
+

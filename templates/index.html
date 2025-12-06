@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Bot Native Host Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .status-card.connected {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .status-card.starting {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .status-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+        
+        .status-text {
+            flex: 1;
+        }
+        
+        .status-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .status-message {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-start {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-stop {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-restart {
+            background: #ffc107;
+            color: #333;
+            grid-column: 1 / -1;
+        }
+        
+        .info-section {
+            background: #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .info-value {
+            color: #333;
+            font-family: monospace;
+        }
+        
+        .logs {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            border-radius: 10px;
+            padding: 20px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-timestamp {
+            color: #888;
+        }
+        
+        .log-message {
+            color: #f8f8f2;
+        }
+        
+        .log-success {
+            color: #50fa7b;
+        }
+        
+        .log-error {
+            color: #ff5555;
+        }
+        
+        .log-warning {
+            color: #ffb86c;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-restart {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Instagram Bot</h1>
+            <p>Native Host Manager</p>
+        </div>
+        
+        <div id="statusCard" class="status-card">
+            <div class="status-header">
+                <div id="statusIcon" class="status-icon">❌</div>
+                <div class="status-text">
+                    <div id="statusTitle" class="status-title">Disconnected</div>
+                    <div id="statusMessage" class="status-message">Native host is not running</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn btn-start">
+                <span>🚀</span> Start Native Host
+            </button>
+            <button id="stopBtn" class="btn btn-stop" disabled>
+                <span>🛑</span> Stop Native Host
+            </button>
+            <button id="restartBtn" class="btn btn-restart">
+                <span>🔄</span> Restart Native Host
+            </button>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-title">📊 Status Information</div>
+            <div class="info-item">
+                <span class="info-label">Connection Status:</span>
+                <span id="connectionStatus" class="info-value">Disconnected</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Bot Active:</span>
+                <span id="botActive" class="info-value">No</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Screen Sharing:</span>
+                <span id="screenSharing" class="info-value">Inactive</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Uptime:</span>
+                <span id="uptime" class="info-value">0s</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Last Activity:</span>
+                <span id="lastActivity" class="info-value">Never</span>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-title">📝 Activity Logs</div>
+            <div id="logs" class="logs">
+                <div class="log-entry">
+                    <span class="log-timestamp">[00:00:00]</span>
+                    <span class="log-message">Web app started. Ready to manage native host.</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🌐 Native Host Web App v1.0 | Made for Instagram Bot</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // DOM elements
+        const statusCard = document.getElementById('statusCard');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusMessage = document.getElementById('statusMessage');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const botActive = document.getElementById('botActive');
+        const screenSharing = document.getElementById('screenSharing');
+        const uptime = document.getElementById('uptime');
+        const lastActivity = document.getElementById('lastActivity');
+        const logs = document.getElementById('logs');
+        
+        // Button event listeners
+        startBtn.addEventListener('click', () => {
+            startBtn.disabled = true;
+            addLog('Starting native host...', 'warning');
+            fetch('/api/start', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addLog('Native host started successfully', 'success');
+                    } else {
+                        addLog(`Failed to start: ${data.message}`, 'error');
+                    }
+                    startBtn.disabled = false;
+                })
+                .catch(error => {
+                    addLog(`Error: ${error.message}`, 'error');
+                    startBtn.disabled = false;
+                });
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            stopBtn.disabled = true;
+            addLog('Stopping native host...', 'warning');
+            fetch('/api/stop', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addLog('Native host stopped successfully', 'success');
+                    } else {
+                        addLog(`Failed to stop: ${data.message}`, 'error');
+                    }
+                    stopBtn.disabled = false;
+                })
+                .catch(error => {
+                    addLog(`Error: ${error.message}`, 'error');
+                    stopBtn.disabled = false;
+                });
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            restartBtn.disabled = true;
+            addLog('Restarting native host...', 'warning');
+            fetch('/api/restart', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addLog('Native host restarted successfully', 'success');
+                    } else {
+                        addLog(`Failed to restart: ${data.message}`, 'error');
+                    }
+                    restartBtn.disabled = false;
+                })
+                .catch(error => {
+                    addLog(`Error: ${error.message}`, 'error');
+                    restartBtn.disabled = false;
+                });
+        });
+        
+        // Socket.IO event listeners
+        socket.on('status_update', (data) => {
+            updateStatus(data.status, data.message);
+            addLog(`Status: ${data.message}`, 'message');
+        });
+        
+        socket.on('keep_alive', (data) => {
+            updateBotState(data.bot_state);
+            addLog('Keep-alive received', 'message');
+        });
+        
+        // Update status display
+        function updateStatus(status, message) {
+            statusCard.className = `status-card ${status}`;
+            
+            switch (status) {
+                case 'connected':
+                    statusIcon.textContent = '✅';
+                    statusTitle.textContent = 'Connected';
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    break;
+                case 'starting':
+                    statusIcon.textContent = '⏳';
+                    statusTitle.textContent = 'Starting';
+                    startBtn.disabled = true;
+                    stopBtn.disabled = true;
+                    break;
+                case 'disconnected':
+                    statusIcon.textContent = '❌';
+                    statusTitle.textContent = 'Disconnected';
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    break;
+                case 'error':
+                    statusIcon.textContent = '⚠️';
+                    statusTitle.textContent = 'Error';
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    break;
+            }
+            
+            statusMessage.textContent = message;
+            connectionStatus.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        }
+        
+        // Update bot state
+        function updateBotState(botState) {
+            botActive.textContent = botState.active ? 'Yes' : 'No';
+            screenSharing.textContent = botState.screen_sharing_active ? 'Active' : 'Inactive';
+            lastActivity.textContent = botState.last_activity ? 
+                new Date(botState.last_activity).toLocaleTimeString() : 'Never';
+        }
+        
+        // Add log entry
+        function addLog(message, type = 'message') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-message">${message}</span>
+            `;
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        // Update uptime
+        function updateUptime() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.is_running) {
+                        const uptimeSeconds = Math.floor(data.uptime);
+                        const hours = Math.floor(uptimeSeconds / 3600);
+                        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+                        const seconds = uptimeSeconds % 60;
+                        uptime.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                    } else {
+                        uptime.textContent = '0s';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating uptime:', error);
+                });
+        }
+        
+        // Update uptime every second
+        setInterval(updateUptime, 1000);
+        
+        // Initial status check
+        fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateStatus(data.status, `Native host is ${data.status}`);
+                    updateBotState(data.bot_state);
+                }
+            })
+            .catch(error => {
+                addLog(`Error checking status: ${error.message}`, 'error');
+            });
+    </script>
+</body>
+</html>
+
+
